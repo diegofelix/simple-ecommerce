@@ -22,6 +22,7 @@ RUN apt-get update -qq \
     libmcrypt-dev \
     openssh-client \
     libmongoc-dev \
+    libicu-dev \
  && apt-get clean
 
 RUN apt-get update
@@ -33,6 +34,8 @@ RUN docker-php-ext-install mysqli
 RUN docker-php-ext-install pdo_mysql
 RUN docker-php-ext-install pgsql
 RUN docker-php-ext-install pdo_pgsql
+RUN docker-php-ext-configure intl
+RUN docker-php-ext-install intl
 RUN rm -rf /tmp/*
 
 RUN apt-get install -y libmagickwand-dev imagemagick
