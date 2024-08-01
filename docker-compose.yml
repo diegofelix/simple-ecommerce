@@ -1,0 +1,78 @@
+services:
+    proxy:
+        container_name: simple_ecommerce_proxy
+        image: traefik:v2.5
+        command:
+            - "--api.insecure=true"
+            - "--providers.docker=true"
+            - "--providers.docker.exposedByDefault=false"
+            - "--entrypoints.web.address=:80"
+            - "--entrypoints.websecure.address=:443"
+            - "--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web"
+            - "--certificatesResolvers.myresolver.acme.email=diegoflx.oliveira@gmail.com"
+            - "--certificatesResolvers.myresolver.acme.storage=/acme.json"
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock:ro"
+            - ".docker/config/traefik/acme.json:/acme.json"
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.simple_ecommerce_proxy.rule=Host(`proxy.test`)"
+            - "traefik.http.routers.simple_ecommerce_proxy.service=api@internal"
+            - "traefik.http.routers.simple_ecommerce_proxy.entrypoints=websecure"
+            - "traefik.http.routers.simple_ecommerce_proxy.tls.certresolver=myresolver"
+
+    web:
+        container_name: simple_ecommerce_web
+        build:
+            context: .docker/build/backend/
+            dockerfile: Dockerfile
+        volumes:
+            - ./:/var/www/
+        labels:
+            - "traefik.enable=true"
+#            - "traefik.http.routers.simple_ecommerce_web.rule=Host(`${BACKEND_DOMAIN}`)"
+            - "traefik.http.routers.simple_ecommerce_web.rule=Host(`ecommerce.test`)"
+            - "traefik.http.routers.simple_ecommerce_web.entrypoints=websecure"
+            - "traefik.http.routers.simple_ecommerce_web.tls=true"
+        depends_on:
+            - proxy
+            - mysql
+            - redis
+#        env_file: .env
+
+    mysql:
+        image: 'mysql:8.3.0'
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            - MYSQL_DATABASE=${DB_DATABASE}
+            - MYSQL_USER=${DB_USERNAME}
+            - MYSQL_PASSWORD=${DB_PASSWORD}
+            - MYSQL_ALLOW_EMPTY_PASSWORD=false
+        volumes:
+            - .docker/data/mysql:/var/lib/mysql
+        healthcheck:
+            test:
+                - CMD
+                - mysqladmin
+                - ping
+                - '-p${DB_PASSWORD}'
+            retries: 3
+            timeout: 5s
+
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - .docker/data/redis:/data
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
