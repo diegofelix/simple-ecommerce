@@ -43,4 +43,14 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function setPriceAttribute(float $value): void
+    {
+        $this->attributes['price'] = $value * 100;
+    }
+
+    public function getPriceAttribute(): float
+    {
+        return $this->attributes['price'] / 100;
+    }
 }
