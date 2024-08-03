@@ -38,4 +38,14 @@ class Order extends Model
     {
         return $this->hasOne(Address::class);
     }
+
+    public function setTotalPurchaseAttribute(float $value): void
+    {
+        $this->attributes['total_purchase'] = $value * 100;
+    }
+
+    public function getTotalPurchaseAttribute(): float
+    {
+        return $this->attributes['total_purchase'] / 100;
+    }
 }

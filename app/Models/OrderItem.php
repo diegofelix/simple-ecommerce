@@ -27,4 +27,24 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function setUnitPriceAttribute(float $value): void
+    {
+        $this->attributes['unit_price'] = $value * 100;
+    }
+
+    public function getUnitPriceAttribute(): float
+    {
+        return $this->attributes['unit_price'] / 100;
+    }
+
+    public function setTotalPriceAttribute(float $value): void
+    {
+        $this->attributes['total_price'] = $value * 100;
+    }
+
+    public function getTotalPriceAttribute(): float
+    {
+        return $this->attributes['total_price'] / 100;
+    }
 }
