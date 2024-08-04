@@ -45,6 +45,13 @@ services:
             - mysql
             - redis
 #        env_file: .env
+    frontend:
+        container_name: simple_ecommerce_frontend
+        build:
+            context: .docker/build/frontend/
+            dockerfile: Dockerfile
+        volumes:
+            - ./:/var/www/
 
     mysql:
         image: 'mysql:8.3.0'
