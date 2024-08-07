@@ -6,5 +6,6 @@ RUN apk add --no-cache python3 py3-pip
 RUN mkdir -p /var/www/
 VOLUME [ "/var/www/" ]
 
+EXPOSE 5173
 USER node
 WORKDIR /var/www/

@@ -1,31 +1,31 @@
 services:
-    proxy:
-        container_name: simple_ecommerce_proxy
-        image: traefik:v2.5
-        command:
-            - "--api.insecure=true"
-            - "--providers.docker=true"
-            - "--providers.docker.exposedByDefault=false"
-            - "--entrypoints.web.address=:80"
-            - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-            - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-            - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
-            - "--entrypoints.websecure.address=:443"
-            - "--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web"
-            - "--certificatesResolvers.myresolver.acme.email=diegoflx.oliveira@gmail.com"
-            - "--certificatesResolvers.myresolver.acme.storage=/acme.json"
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            - "/var/run/docker.sock:/var/run/docker.sock:ro"
-            - ".docker/config/traefik/acme.json:/acme.json"
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.simple_ecommerce_proxy.rule=Host(`proxy.test`)"
-            - "traefik.http.routers.simple_ecommerce_proxy.service=api@internal"
-            - "traefik.http.routers.simple_ecommerce_proxy.entrypoints=websecure"
-            - "traefik.http.routers.simple_ecommerce_proxy.tls.certresolver=myresolver"
+#    proxy:
+#        container_name: simple_ecommerce_proxy
+#        image: traefik:v2.5
+#        command:
+#            - "--api.insecure=true"
+#            - "--providers.docker=true"
+#            - "--providers.docker.exposedByDefault=false"
+#            - "--entrypoints.web.address=:80"
+#            - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+#            - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+#            - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+#            - "--entrypoints.websecure.address=:443"
+#            - "--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web"
+#            - "--certificatesResolvers.myresolver.acme.email=diegoflx.oliveira@gmail.com"
+#            - "--certificatesResolvers.myresolver.acme.storage=/acme.json"
+#        ports:
+#            - "80:80"
+#            - "443:443"
+#        volumes:
+#            - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#            - ".docker/config/traefik/acme.json:/acme.json"
+#        labels:
+#            - "traefik.enable=true"
+#            - "traefik.http.routers.simple_ecommerce_proxy.rule=Host(`proxy.test`)"
+#            - "traefik.http.routers.simple_ecommerce_proxy.service=api@internal"
+#            - "traefik.http.routers.simple_ecommerce_proxy.entrypoints=websecure"
+#            - "traefik.http.routers.simple_ecommerce_proxy.tls.certresolver=myresolver"
 
     web:
         container_name: simple_ecommerce_web
@@ -34,17 +34,22 @@ services:
             dockerfile: Dockerfile
         volumes:
             - ./:/var/www/
+#        ports:
+#            - "5173:5173"
         labels:
             - "traefik.enable=true"
-#            - "traefik.http.routers.simple_ecommerce_web.rule=Host(`${BACKEND_DOMAIN}`)"
-            - "traefik.http.routers.simple_ecommerce_web.rule=Host(`ecommerce.test`)"
-            - "traefik.http.routers.simple_ecommerce_web.entrypoints=websecure"
             - "traefik.http.routers.simple_ecommerce_web.tls=true"
+            - "traefik.http.routers.simple_ecommerce_web.tls.certresolver=cloudflare"
+            - "traefik.http.routers.simple_ecommerce_web.entrypoints=websecure"
+            - "traefik.http.routers.simple_ecommerce_web.rule=Host(`ecommerce.local.diegofelix.com.br`)"
+            - "traefik.docker.network=traefik"
         depends_on:
-            - proxy
             - mysql
             - redis
-#        env_file: .env
+        networks:
+            - traefik
+            - default
+
     frontend:
         container_name: simple_ecommerce_frontend
         build:
@@ -52,6 +57,18 @@ services:
             dockerfile: Dockerfile
         volumes:
             - ./:/var/www/
+        command: "npm run dev -- --host=0.0.0.0"
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.simple_ecommerce_frontend.tls=true"
+            - "traefik.http.routers.simple_ecommerce_frontend.tls.certresolver=cloudflare"
+            - "traefik.http.routers.simple_ecommerce_frontend.entrypoints=vite"
+            - "traefik.http.routers.simple_ecommerce_frontend.rule=Host(`frontend.local.diegofelix.com.br`)"
+            - "traefik.docker.network=traefik"
+            - "traefik.http.services.simple_ecommerce_frontend.loadbalancer.server.port=5173"
+        networks:
+            - traefik
+            - default
 
     mysql:
         image: 'mysql:8.3.0'
@@ -86,3 +103,7 @@ services:
                 - ping
             retries: 3
             timeout: 5s
+
+networks:
+    traefik:
+        external: true
