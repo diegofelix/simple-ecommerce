@@ -7,7 +7,7 @@
                         <h1 class="block text-2xl font-bold text-gray-800 dark:text-white">Sign in</h1>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                             Don't have an account yet?
-                            <a class="text-blue-600 decoration-2 hover:underline font-medium dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" href="/register">
+                            <a wire:navigate class="text-blue-600 decoration-2 hover:underline font-medium dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" href="/register">
                                 Sign up here
                             </a>
                         </p>
@@ -37,7 +37,7 @@
                             <div>
                                 <div class="flex justify-between items-center">
                                     <label for="password" class="block text-sm mb-2 dark:text-white">Password</label>
-                                    <a class="text-sm text-blue-600 decoration-2 hover:underline font-medium dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" href="/forgot">Forgot password?</a>
+                                    <a wire:navigate class="text-sm text-blue-600 decoration-2 hover:underline font-medium dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" href="/forgot">Forgot password?</a>
                                 </div>
                                 <div class="relative">
                                     <input type="password" id="password" name="password" class="py-3 px-4 block w-full border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600" required aria-describedby="password-error">
