@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Category;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Title('Categories - Ecommerce')]
