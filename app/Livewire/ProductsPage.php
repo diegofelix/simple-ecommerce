@@ -7,6 +7,7 @@ use App\Livewire\Partials\Navbar;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -16,6 +17,7 @@ use Livewire\WithPagination;
 class ProductsPage extends Component
 {
     use WithPagination;
+    use LivewireAlert;
 
     #[Url('selected_categories')]
     public array $selectedCategories = [];
@@ -41,6 +43,12 @@ class ProductsPage extends Component
 
         $this->dispatch('cartUpdatedCount', totalCount: $totalItems)
             ->to(Navbar::class);
+
+        $this->alert('success', 'Item added to cart', [
+            'position' => 'bottom-end',
+            'timer' => 3000,
+            'toast' => true,
+        ]);
     }
 
     public function render()
