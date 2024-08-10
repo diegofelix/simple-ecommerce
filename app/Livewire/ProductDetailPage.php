@@ -15,7 +15,7 @@ class ProductDetailPage extends Component
     use LivewireAlert;
 
     public string $slug;
-    public int $quantity = 1;
+    public float $quantity = 1;
 
     public function increaseQuantity(): void
     {
@@ -31,7 +31,7 @@ class ProductDetailPage extends Component
 
     public function addToCart(int $productId)
     {
-        $totalItems = CartManagement::addItemToCart($productId);
+        $totalItems = CartManagement::addItemToCart($productId, $this->quantity);
 
         $this->dispatch('cartUpdatedCount', totalCount: $totalItems)
             ->to(Navbar::class);

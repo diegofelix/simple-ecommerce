@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Cookie;
 
 class CartManagement
 {
-    public static function addItemToCart(int $productId): int
+    public static function addItemToCart(int $productId, float $quantity = 1): int
     {
         $cartItems = self::getCartItems();
 
@@ -16,7 +16,7 @@ class CartManagement
                 continue;
             }
 
-            $cartItems = self::incrementQuantityToCartItem($productId);
+            $cartItems = self::incrementQuantityToCartItem($productId, $quantity);
 
             return count($cartItems);
         }
@@ -29,7 +29,7 @@ class CartManagement
             'product_id' => $product->id,
             'name' => $product->name,
             'image' => $product->images[0],
-            'quantity' => 1,
+            'quantity' => $quantity,
             'unit_price' => $product->price,
             'total_price' => $product->price
         ];
@@ -54,13 +54,13 @@ class CartManagement
         return $cartItems;
     }
 
-    public static function incrementQuantityToCartItem(int $productId): array
+    public static function incrementQuantityToCartItem(int $productId, float $quantity = 1): array
     {
         $cartItems = self::getCartItems();
 
         foreach ($cartItems as $key => $cartItem) {
             if ($cartItem['product_id'] === $productId) {
-                $cartItems[$key]['quantity']++;
+                $cartItems[$key]['quantity']+= $quantity;
                 $cartItems[$key]['total_price'] = $cartItems[$key]['quantity'] * $cartItems[$key]['unit_price'];
             }
         }
