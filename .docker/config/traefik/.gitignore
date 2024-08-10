@@ -1,2 +1,5 @@
 *
 !.gitignore
+!config.yml
+!traefik.env.example
+!traefik.yml

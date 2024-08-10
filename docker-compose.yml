@@ -1,4 +1,34 @@
 services:
+    proxy:
+        image: traefik:v3.1
+        container_name: proxy_traefik
+        security_opt:
+            - no-new-privileges:true
+        command:
+            - "--api.insecure=true"
+        ports:
+            - "80:80"
+            - "443:443"
+            - "5173:5173"
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock:ro"
+            - /etc/localtime:/etc/localtime:ro
+            - .docker/config/traefik/traefik.yml:/traefik.yml:ro
+            - .docker/config/traefik/config.yml:/config.yml:ro
+            - .docker/config/traefik/acme.json:/acme.json
+            - .docker/data/traefik/conf/:/etc/traefik/conf/
+            - .docker/data/traefik/certs/:/etc/traefik/certs/
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.traefik.service=api@internal"
+            - "traefik.http.routers.traefik.rule=Host(`proxy.local.diegofelix.com.br`)"
+            - "traefik.http.routers.traefik.tls=true"
+            - "traefik.docker.network=traefik"
+        env_file:
+            - .docker/config/traefik/traefik.env
+        networks:
+            - traefik
+        restart: unless-stopped
 #    proxy:
 #        container_name: simple_ecommerce_proxy
 #        image: traefik:v2.5
@@ -106,4 +136,5 @@ services:
 
 networks:
     traefik:
-        external: true
+        name: traefik
+        driver: bridge
