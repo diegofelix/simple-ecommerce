@@ -30,6 +30,9 @@ class ProductsPage extends Component
     #[Url('price_range')]
     public int $priceRange = 50000;
 
+    #[Url('sort')]
+    public string $sort = 'latest';
+
     public function render()
     {
         $products = Product::query()
@@ -45,6 +48,9 @@ class ProductsPage extends Component
             })
             ->when($this->onSale, function ($query) {
                 $query->where('on_sale', true);
+            })
+            ->when($this->sort === 'price', function ($query) {
+                $query->orderBy('price');
             })
             ->where('price', '<=', $this->priceRange)
             ->paginate(6);
