@@ -3,8 +3,10 @@
 namespace App\Livewire;
 
 use App\Helpers\CartManagement;
+use App\Mail\OrderPlaced;
 use App\Models\Address;
 use App\Models\Order;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Stripe\Checkout\Session;
@@ -88,11 +90,12 @@ class CheckoutPage extends Component
 
         $redirectUrl = '';
 
+        $authenticatedUser = auth()->user();
         if ($this->paymentMethod === 'stripe') {
             Stripe::setApiKey(env('STRIPE_SECRET'));
             $sessionCheckout = Session::create([
                 'payment_method_types' => ['card'],
-                'customer_email' => auth()->user()->email,
+                'customer_email' => $authenticatedUser->email,
                 'line_items' => $lineItems,
                 'mode' => 'payment',
                 'success_url' => route('success').'?session_id={CHECKOUT_SESSION_ID}',
@@ -108,6 +111,8 @@ class CheckoutPage extends Component
         $order->address()->save($address);
         $order->items()->createMany($cartItems);
         CartManagement::clearCartItems();
+        Mail::to($authenticatedUser->email)
+            ->send(new OrderPlaced($order));
 
         return redirect($redirectUrl);
     }
