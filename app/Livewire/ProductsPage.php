@@ -70,7 +70,7 @@ class ProductsPage extends Component
             ->when($this->sort === 'price', function ($query) {
                 $query->orderBy('price');
             })
-            ->where('price', '<=', $this->priceRange)
+            ->where('price', '<=', $this->priceRange * 100)
             ->paginate(6);
 
         $brands = Brand::where('is_active', true)->get(['id', 'name', 'slug']);
