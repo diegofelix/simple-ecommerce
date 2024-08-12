@@ -38,3 +38,19 @@ You also, can:
 - Manage the brands
 - Manage the orders
 - Manage the users
+
+Here are some screenshots from the local environment
+![Screenshot 2024-08-12 195152](https://github.com/user-attachments/assets/d8b14c94-d078-4c28-a7b1-d4a38c4a0af6)
+![Screenshot 2024-08-12 195246](https://github.com/user-attachments/assets/02070989-8560-47fe-8354-b15db695eb19)
+![Screenshot 2024-08-12 195300](https://github.com/user-attachments/assets/663207d3-d992-48ad-8aba-5688eb720a4f)
+![Screenshot 2024-08-12 195313](https://github.com/user-attachments/assets/683af88c-342a-4eba-9164-997ebabff24c)
+![Screenshot 2024-08-12 195328](https://github.com/user-attachments/assets/e65c6365-9b1c-47f8-85a0-f5162db18a56)
+![Screenshot 2024-08-12 195400](https://github.com/user-attachments/assets/9a80abd2-7ea1-4061-aa86-21449b25c123)
+![Screenshot 2024-08-12 195420](https://github.com/user-attachments/assets/28499b40-8dac-4080-9447-674334c4bd6d)
+
+
+
+
+
+
+
