@@ -1,27 +1,37 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Ecommerce\Cart;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\Cookie;
 
-class CartManagement
+class CookieCart
 {
-    public static function addItemToCart(int $productId, float $quantity = 1): int
-    {
-        $cartItems = self::getCartItems();
+    public function __construct(
+        private readonly Product $product,
+        private readonly Cookie $cookie,
+    ) {
+    }
 
-        foreach ($cartItems as $key => $cartItem) {
+    public function getCartItems(): array
+    {
+        return $this->cookie->get();
+    }
+
+    public function addItemToCart(int $productId, float $quantity = 1): int
+    {
+        $cartItems = $this->getCartItems();
+
+        foreach ($cartItems as $cartItem) {
             if ($cartItem['product_id'] !== $productId) {
                 continue;
             }
 
-            $cartItems = self::incrementQuantityToCartItem($productId, $quantity);
+            $cartItems = $this->incrementQuantityToCartItem($productId, $quantity);
 
             return count($cartItems);
         }
 
-        if (!$product = Product::find($productId, ['id', 'name', 'price', 'images'])) {
+        if (!$product = $this->getProductById($productId)) {
             return 0;
         }
 
@@ -34,14 +44,14 @@ class CartManagement
             'total_price' => $product->price
         ];
 
-        self::addCartItemsToCookie($cartItems);
+        $this->addCartItemsToCookie($cartItems);
 
         return count($cartItems);
     }
 
-    public static function removeCartItem(int $productId): array
+    public function removeCartItem(int $productId): array
     {
-        $cartItems = self::getCartItems();
+        $cartItems = $this->getCartItems();
 
         foreach ($cartItems as $key => $cartItem) {
             if ($cartItem['product_id'] === $productId) {
@@ -49,14 +59,14 @@ class CartManagement
             }
         }
 
-        self::addCartItemsToCookie($cartItems);
+        $this->addCartItemsToCookie($cartItems);
 
         return $cartItems;
     }
 
-    public static function incrementQuantityToCartItem(int $productId, float $quantity = 1): array
+    public function incrementQuantityToCartItem(int $productId, float $quantity = 1): array
     {
-        $cartItems = self::getCartItems();
+        $cartItems = $this->getCartItems();
 
         foreach ($cartItems as $key => $cartItem) {
             if ($cartItem['product_id'] === $productId) {
@@ -65,14 +75,14 @@ class CartManagement
             }
         }
 
-        self::addCartItemsToCookie($cartItems);
+        $this->addCartItemsToCookie($cartItems);
 
         return $cartItems;
     }
 
-    public static function decrementQuantityToCartItem(int $productId): array
+    public function decrementQuantityToCartItem(int $productId): array
     {
-        $cartItems = self::getCartItems();
+        $cartItems = $this->getCartItems();
 
         foreach ($cartItems as $key => $cartItem) {
             if ($cartItem['product_id'] !== $productId) {
@@ -89,32 +99,30 @@ class CartManagement
             $cartItems[$key]['total_price'] = $cartItems[$key]['quantity'] * $cartItems[$key]['unit_price'];
         }
 
-        self::addCartItemsToCookie($cartItems);
+        $this->addCartItemsToCookie($cartItems);
 
         return $cartItems;
     }
 
-    public static function calculateTotalPrice(array $cartItems): int
+    public function calculateTotalPrice(array $cartItems): int
     {
         return array_sum(array_column($cartItems, 'total_price'));
     }
 
-    static public function addCartItemsToCookie(array $cartItems): void
+    public function clearCartItems(): void
     {
-        $cartItems = json_encode($cartItems);
-
-        Cookie::queue('cart_items', $cartItems, 60*24*30);
+        $this->cookie->forget();
     }
 
-    public static function clearCartItems(): void
+    private function addCartItemsToCookie(array $cartItems): void
     {
-        Cookie::queue(Cookie::forget('cart_items'));
+        $this->cookie->queue($cartItems);
     }
 
-    public static function getCartItems(): array
+    private function getProductById(int $productId): ?Product
     {
-        $cartItems = Cookie::get('cart_items');
-
-        return $cartItems ? json_decode($cartItems, true) : [];
+        return $this->product
+            ->query()
+            ->find($productId, ['id', 'name', 'price', 'images']);
     }
 }
