@@ -2,9 +2,10 @@
 
 namespace App\Livewire;
 
-use App\Helpers\CartManagement;
 use App\Livewire\Partials\Navbar;
 use App\Models\Product;
+use App\Ecommerce\Cart\CookieCart;
+use Illuminate\Contracts\View\View;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -16,6 +17,12 @@ class ProductDetailPage extends Component
 
     public string $slug;
     public float $quantity = 1;
+    private CookieCart $cookieCart;
+
+    public function boot(CookieCart $cookieCart): void
+    {
+        $this->cookieCart = $cookieCart;
+    }
 
     public function increaseQuantity(): void
     {
@@ -29,9 +36,9 @@ class ProductDetailPage extends Component
         }
     }
 
-    public function addToCart(int $productId)
+    public function addToCart(int $productId): void
     {
-        $totalItems = CartManagement::addItemToCart($productId, $this->quantity);
+        $totalItems = $this->cookieCart->addItemToCart($productId, $this->quantity);
 
         $this->dispatch('cartUpdatedCount', totalCount: $totalItems)
             ->to(Navbar::class);
@@ -44,11 +51,12 @@ class ProductDetailPage extends Component
     }
 
 
-    public function mount(string $slug) {
+    public function mount(string $slug): void
+    {
         $this->slug = $slug;
     }
 
-    public function render()
+    public function render(): View
     {
         $product = Product::where('slug', $this->slug)->firstOrFail();
 

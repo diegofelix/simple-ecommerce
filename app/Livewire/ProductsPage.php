@@ -2,11 +2,12 @@
 
 namespace App\Livewire;
 
-use App\Helpers\CartManagement;
 use App\Livewire\Partials\Navbar;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Ecommerce\Cart\CookieCart;
+use Illuminate\Contracts\View\View;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -37,9 +38,16 @@ class ProductsPage extends Component
     #[Url('sort')]
     public string $sort = 'latest';
 
-    public function addToCart(int $productId)
+    private CookieCart $cookieCart;
+
+    public function boot(CookieCart $cookieCart): void
     {
-        $totalItems = CartManagement::addItemToCart($productId);
+        $this->cookieCart = $cookieCart;
+    }
+
+    public function addToCart(int $productId): void
+    {
+        $totalItems = $this->cookieCart->addItemToCart($productId);
 
         $this->dispatch('cartUpdatedCount', totalCount: $totalItems)
             ->to(Navbar::class);
@@ -51,7 +59,7 @@ class ProductsPage extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         $products = Product::query()
             ->where('is_active', true)
