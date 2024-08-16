@@ -107,6 +107,46 @@ class CookieCartTest extends TestCase
         $this->assertSame(1, $cartItemsCount);
     }
 
+    public function testShouldAddProductWithQuantity(): void
+    {
+        // Set
+        $product = m::mock(Product::class);
+        $cookie = m::mock(Cookie::class);
+        $cart = new CookieCart($product, $cookie);
+        $model = Product::factory()->make(['id' => 20]);
+
+        // Expectations
+        $cookie->expects()
+            ->get()
+            ->andReturn([]);
+
+        $product->expects()
+            ->query()
+            ->andReturnSelf();
+
+        $product->expects()
+            ->find(20, ['id', 'name', 'price', 'images'])
+            ->andReturn($model);
+
+        $cookie->expects()
+            ->queue([
+                [
+                    'product_id' => 20,
+                    'name' => $model->name,
+                    'image' => $model->images[0],
+                    'quantity' => 10,
+                    'unit_price' => $model->price,
+                    'total_price' => $model->price
+                ]
+            ]);
+
+        // Actions
+        $cartItemsCount = $cart->addItemToCart(20, 10);
+
+        // Assertions
+        $this->assertSame(1, $cartItemsCount);
+    }
+
     public function testShouldUpdateProductOnCookie(): void
     {
         // Set
